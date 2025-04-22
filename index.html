@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>路径映射生成器</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        #output {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            white-space: pre-wrap; /* 保留换行和空格 */
+            word-wrap: break-word; /* 允许长单词换行 */
+            font-family: monospace;
+            line-height: 1.6;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        h1 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>路径映射生成器</h1>
+    <button onclick="generateMapping()">生成案例</button>
+    <button id="copyButton" onclick="copyToClipboard()">复制</button>
+
+    <div id="output">
+        点击“生成案例”按钮来创建一套路径映射。
+    </div>
+
+    <script>
+        function generateRandomString(length) {
+            const characters = 'abcdefghijklmnopqrstuvwxyz';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return result;
+        }
+
+        function generateMapping() {
+            const leftPaths = [
+                "com.mc.win.mask.superpush.jf.JpaActivity",
+                "com.mc.win.mask.superpush.jf.JpbActivity",
+                "com.mc.win.mask.superpush.jf.JpcActivity"
+            ];
+
+            const part1 = generateRandomString(5);
+            const part2 = generateRandomString(5);
+            const part3 = generateRandomString(3);
+            const basePath = `com.${part1}.${part2}.${part3}`;
+
+            const ending1 = generateRandomString(4) + "bb";
+            const ending2 = generateRandomString(4) + "aa";
+            const ending3 = generateRandomString(4) + "cc";
+
+            const rightPaths = [
+                `${basePath}.${ending1}`,
+                `${basePath}.${ending2}`,
+                `${basePath}.${ending3}`
+            ];
+
+            let outputText = "";
+            for (let i = 0; i < leftPaths.length; i++) {
+                outputText += `${leftPaths[i]} -> ${rightPaths[i]}
+`;
+            }
+
+            document.getElementById('output').textContent = outputText.trim();
+        }
+
+        function copyToClipboard() {
+            const outputElement = document.getElementById('output');
+            const textToCopy = outputElement.textContent;
+
+            if (!textToCopy || textToCopy === "点击“生成案例”按钮来创建一套路径映射。") {
+                alert("请先生成案例后再复制！");
+                return;
+            }
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const copyButton = document.getElementById('copyButton');
+                const originalText = copyButton.textContent;
+                copyButton.textContent = '已复制!';
+                setTimeout(() => {
+                    copyButton.textContent = originalText;
+                }, 1500);
+            }).catch(err => {
+                console.error('无法复制文本: ', err);
+                alert('复制失败，请检查浏览器权限或手动复制。');
+            });
+        }
+
+        // Optional: Generate one set on initial load
+        // generateMapping();
+    </script>
+
+</body>
+</html> 
