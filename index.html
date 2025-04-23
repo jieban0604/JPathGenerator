@@ -3,53 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>路径映射生成器</title>
+    <title>Intent URL 生成器</title>
     <style>
         body {
             font-family: sans-serif;
             padding: 20px;
-            background-color: #f4f4f4;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        #output {
-            margin-top: 20px;
-            padding: 15px;
+        .container {
             background-color: #fff;
-            border: 1px solid #ddd;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 700px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
             border-radius: 4px;
-            white-space: pre-wrap; /* 保留换行和空格 */
-            word-wrap: break-word; /* 允许长单词换行 */
+            box-sizing: border-box; /* 防止 padding 影响总宽度 */
+            font-size: 14px;
+        }
+        textarea {
+            min-height: 150px;
+            resize: vertical; /* 允许垂直调整大小 */
             font-family: monospace;
-            line-height: 1.6;
         }
         button {
-            padding: 10px 15px;
+            padding: 12px 20px;
             font-size: 16px;
             cursor: pointer;
-            background-color: #007bff;
+            background-color: #28a745;
             color: white;
             border: none;
             border-radius: 4px;
             transition: background-color 0.3s ease;
+            margin-right: 10px;
         }
         button:hover {
+            background-color: #218838;
+        }
+        #copyButton {
+            background-color: #007bff;
+        }
+        #copyButton:hover {
             background-color: #0056b3;
         }
-        h1 {
-            color: #333;
+        .output-area {
+            margin-top: 20px;
+        }
+        #intentUrlOutput {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #e9ecef;
+            min-height: 100px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            box-sizing: border-box;
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>Intent URL 生成器</h1>
 
-    <h1>路径映射生成器</h1>
-    <button onclick="generateMapping()">生成案例</button>
-    <button id="copyButton" onclick="copyToClipboard()">复制</button>
+        <div>
+            <label for="mappingPaths">映射路径 (每行一个):</label>
+            <button onclick="generateMappingPaths()" style="margin-left: 10px; padding: 5px 10px; font-size: 12px; background-color: #6c757d;">生成映射</button>
+            <button id="copyMappingButton" onclick="copyMappingPaths()" style="margin-left: 5px; padding: 5px 10px; font-size: 12px; background-color: #007bff;">复制</button>
+            <textarea id="mappingPaths" placeholder="例如:
+com.mc.win.mask.superpush.jf.JpaActivity -> com.bkrf.fslqp.kcu.yjkybb:
+com.mc.win.mask.superpush.jf.JpbActivity -> com.bkrf.fslqp.kcu.yjkyaa:
+com.mc.win.mask.superpush.jf.JpcActivity -> com.bkrf.fslqp.kcu.yjkycc:"></textarea>
+        </div>
 
-    <div id="output">
-        点击“生成案例”按钮来创建一套路径映射。
+        <div>
+            <label for="packageName">主包名:</label>
+            <input type="text" id="packageName" placeholder="例如: com.jcx.MaxView">
+        </div>
+
+        <div>
+            <button onclick="generateIntentUrl()">生成 Intent URL</button>
+            <button id="copyButton" onclick="copyIntentUrl()">复制结果</button>
+        </div>
+
+        <div class="output-area">
+            <label for="intentUrlOutput">生成的 Intent URL:</label>
+            <div id="intentUrlOutput"></div>
+        </div>
     </div>
 
     <script>
+        function generateIntentUrl() {
+            const packageName = document.getElementById('packageName').value.trim();
+            const mappingPathsText = document.getElementById('mappingPaths').value.trim();
+            const outputDiv = document.getElementById('intentUrlOutput');
+
+            if (!packageName) {
+                alert("请输入主包名！");
+                return;
+            }
+            if (!mappingPathsText) {
+                alert("请输入映射路径！");
+                return;
+            }
+
+            const lines = mappingPathsText.split('\n');
+            let intentUrlResult = '';
+
+            for (const line of lines) {
+                const parts = line.split('->');
+                if (parts.length === 2) {
+                    let targetPath = parts[1].trim();
+                    // 移除末尾可能存在的冒号
+                    if (targetPath.endsWith(':')) {
+                        targetPath = targetPath.slice(0, -1);
+                    }
+                    if (targetPath) {
+                        intentUrlResult += `intent:#Intent;component=${packageName}/${targetPath};end`;
+                    }
+                }
+            }
+
+            outputDiv.textContent = intentUrlResult;
+        }
+
         function generateRandomString(length) {
             const characters = 'abcdefghijklmnopqrstuvwxyz';
             let result = '';
@@ -59,7 +159,7 @@
             return result;
         }
 
-        function generateMapping() {
+        function generateMappingPaths() {
             const leftPaths = [
                 "com.mc.win.mask.superpush.jf.JpaActivity",
                 "com.mc.win.mask.superpush.jf.JpbActivity",
@@ -76,31 +176,52 @@
             const ending3 = generateRandomString(4) + "cc";
 
             const rightPaths = [
-                `${basePath}.${ending1}`,
-                `${basePath}.${ending2}`,
-                `${basePath}.${ending3}`
+                `${basePath}.${ending1}:`,
+                `${basePath}.${ending2}:`,
+                `${basePath}.${ending3}:` // 在末尾加上冒号以符合示例格式
             ];
 
-            let outputText = "";
+            let mappingText = "";
             for (let i = 0; i < leftPaths.length; i++) {
-                outputText += `${leftPaths[i]} -> ${rightPaths[i]}
-`;
+                mappingText += `${leftPaths[i]} -> ${rightPaths[i]}\n`; // 使用 \n 进行换行
             }
 
-            document.getElementById('output').textContent = outputText.trim();
+            document.getElementById('mappingPaths').value = mappingText.trim(); // 设置textarea的值
         }
 
-        function copyToClipboard() {
-            const outputElement = document.getElementById('output');
-            const textToCopy = outputElement.textContent;
+        function copyMappingPaths() {
+            const mappingTextArea = document.getElementById('mappingPaths');
+            const textToCopy = mappingTextArea.value;
+            const copyButton = document.getElementById('copyMappingButton');
 
-            if (!textToCopy || textToCopy === "点击“生成案例”按钮来创建一套路径映射。") {
-                alert("请先生成案例后再复制！");
+            if (!textToCopy) {
+                alert("映射路径为空，无法复制！");
                 return;
             }
 
             navigator.clipboard.writeText(textToCopy).then(() => {
-                const copyButton = document.getElementById('copyButton');
+                const originalText = copyButton.textContent;
+                copyButton.textContent = '已复制!';
+                setTimeout(() => {
+                    copyButton.textContent = originalText;
+                }, 1500);
+            }).catch(err => {
+                console.error('无法复制映射路径: ', err);
+                alert('复制失败，请检查浏览器权限或手动复制。');
+            });
+        }
+
+        function copyIntentUrl() {
+            const outputDiv = document.getElementById('intentUrlOutput');
+            const textToCopy = outputDiv.textContent;
+            const copyButton = document.getElementById('copyButton');
+
+            if (!textToCopy) {
+                alert("请先生成 Intent URL 再复制！");
+                return;
+            }
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
                 const originalText = copyButton.textContent;
                 copyButton.textContent = '已复制!';
                 setTimeout(() => {
@@ -111,9 +232,6 @@
                 alert('复制失败，请检查浏览器权限或手动复制。');
             });
         }
-
-        // Optional: Generate one set on initial load
-        // generateMapping();
     </script>
 
 </body>
